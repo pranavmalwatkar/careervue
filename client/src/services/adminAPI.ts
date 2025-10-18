@@ -408,5 +408,10 @@ export const adminAPI = {
 
   getContactMessageStats: async () => {
     return adminApiRequest('/contact-messages/stats/overview');
+  },
+
+  // Message Statistics for Dashboard
+  getMessageStatistics: async () => {
+    return adminApiRequest('/messages/statistics');
   }
 };

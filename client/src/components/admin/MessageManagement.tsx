@@ -111,6 +111,35 @@ export const MessageManagement: React.FC<MessageManagementProps> = ({ onMessageU
     setShowMessageModal(true);
   };
 
+  const handleStatusChange = async (messageId: string, newStatus: string, newPriority: string) => {
+    try {
+      await adminAPI.updateContactMessageStatus(messageId, {
+        status: newStatus,
+        priority: newPriority
+      });
+      
+      // Update local state
+      setMessages(messages.map(msg => 
+        msg._id === messageId 
+          ? { ...msg, status: newStatus, priority: newPriority }
+          : msg
+      ));
+      
+      if (selectedMessage && selectedMessage._id === messageId) {
+        setSelectedMessage({ ...selectedMessage, status: newStatus, priority: newPriority });
+      }
+      
+      // Refresh data
+      fetchMessages();
+      if (onMessageUpdate) {
+        onMessageUpdate();
+      }
+    } catch (error) {
+      console.error('Error updating message status:', error);
+      alert('Failed to update message status');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
@@ -339,19 +368,41 @@ export const MessageManagement: React.FC<MessageManagementProps> = ({ onMessageU
 
                   <div>
                     <h4 className="font-medium text-gray-900 mb-2">Message Information</h4>
-                    <div className="bg-gray-50 p-3 rounded-md">
+                    <div className="bg-gray-50 p-3 rounded-md space-y-3">
                       <p><strong>Subject:</strong> {selectedMessage.subject}</p>
-                      <p><strong>Priority:</strong> {selectedMessage.priority}</p>
-                      <p><strong>Status:</strong> {selectedMessage.status}</p>
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Status
+                          </label>
+                          <select
+                            value={selectedMessage.status}
+                            onChange={(e) => handleStatusChange(selectedMessage._id, e.target.value, selectedMessage.priority)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="unread">Unread</option>
+                            <option value="read">Read</option>
+                            <option value="replied">Replied</option>
+                            <option value="archived">Archived</option>
+                          </select>
+                        </div>
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Priority
+                          </label>
+                          <select
+                            value={selectedMessage.priority}
+                            onChange={(e) => handleStatusChange(selectedMessage._id, selectedMessage.status, e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Application Status</h4>
-                  <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusBadgeColor(selectedMessage.status)}`}>
-                    {selectedMessage.status}
-                  </span>
                 </div>
 
                 <div>

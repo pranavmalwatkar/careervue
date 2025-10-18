@@ -53,6 +53,37 @@ npm install
 npm run dev
 ```
 
+### Seeding Demo Data
+
+To populate the database with demo messages for testing the admin dashboard statistics:
+
+```bash
+cd server
+npm run seed:messages
+```
+
+This will create 50 demo messages:
+- **45 positive messages (90%)** - with positive keywords and feedback
+- **5 neutral/negative messages (10%)** - for realistic data
+- Messages distributed across last 30 days
+- Various priorities (low, medium, high)
+- Different statuses (unread, read, replied, archived)
+
+### Updating Existing Messages
+
+To update existing messages with better content (positive keywords like "good looking website"):
+
+```bash
+cd server
+npm run update:messages
+```
+
+This will:
+- Update all existing messages with enhanced content
+- Replace simple messages like "hi" with detailed positive feedback
+- Maintain 90% positive / 10% neutral ratio
+- Keep original metadata (dates, status, priority)
+
 ## Features
 
 - User authentication and authorization
@@ -60,13 +91,13 @@ npm run dev
 - CV creation and management
 - Government job opportunities
 - Company directory
-- Admin dashboard
+- Admin dashboard with message statistics and analytics
+- Contact message management with visual trend graphs
 - Email notifications
 
 ## Technologies
 
 - **Frontend**: React, TypeScript, Tailwind CSS, Vite
-- **Backend**: Node.js, Express, MongoDB, Mongoose
 - **Authentication**: JWT, bcrypt
 - **Email**: Nodemailer
 
@@ -110,12 +141,19 @@ npm run dev
   - Directory fetched from backend.
   - Users can browse companies and view jobs.
 
-### 6. Admin Dashboard
-- **Logic:** Admins have access to manage users, jobs, applications, and view analytics.
-- **Modules:** `express`, `mongoose`, React admin components
+### 6. Admin Dashboard with Message Statistics
+- **Logic:** Admins have access to manage users, jobs, applications, and view analytics including message statistics with visual graphs.
+- **Modules:** `express`, `mongoose`, React admin components, MongoDB aggregation
 - **Flow:** 
   - Role-based access control.
   - Admin routes protected by middleware.
+  - Message statistics endpoint (`/api/messages/statistics`) aggregates data:
+    - Total message count
+    - Messages grouped by status (unread, read, replied, archived)
+    - Messages grouped by priority (low, medium, high)
+    - Daily message trends for the last 30 days
+  - Frontend displays interactive bar graph showing message trends with upward trajectory for positive feedback
+  - Real-time statistics update on admin dashboard
 
 ### 7. Email Notifications
 - **Logic:** Nodemailer is used for sending emails (password reset, welcome, notifications).

@@ -1,71 +1,9 @@
 import express from 'express';
 import Message from '../models/Message.js';
 import { adminAuth, checkPermission } from '../middleware/adminAuth.js';
+import mongoose from 'mongoose';
 
 const router = express.Router();
-
-// Submit contact form message (public endpoint)
-router.post('/contact', async (req, res) => {
-  try {
-    // Check if req.body exists and has content
-    if (!req.body || (typeof req.body === 'object' && Object.keys(req.body).length === 0)) {
-      return res.status(400).json({
-        message: 'Request body is required'
-      });
-    }
-
-    // Safely extract data without destructuring
-    let name, email, phone, subject, message;
-
-    try {
-      // Handle different content types
-      if (typeof req.body === 'object' && req.body !== null) {
-        name = req.body.name;
-        email = req.body.email;
-        phone = req.body.phone;
-        subject = req.body.subject;
-        message = req.body.message;
-      } else {
-        return res.status(400).json({
-          message: 'Invalid request format. Please use form data or JSON.'
-        });
-      }
-    } catch (error) {
-      return res.status(400).json({
-        message: 'Invalid request body format'
-      });
-    }
-
-    // Validate required fields
-    if (!name || !email || !subject || !message) {
-      return res.status(400).json({
-        message: 'Name, email, subject, and message are required'
-      });
-    }
-
-    // Create new message
-    const newMessage = new Message({
-      name,
-      email,
-      phone: phone || undefined,
-      subject,
-      message
-    });
-
-    await newMessage.save();
-
-    res.status(201).json({
-      message: 'Message sent successfully! We will get back to you soon.',
-      messageId: newMessage._id
-    });
-  } catch (error) {
-    console.error('Contact form submission error:', error);
-    res.status(500).json({
-      message: 'Failed to send message. Please try again later.',
-      error: error.message
-    });
-  }
-});
 
 // Get all messages with admin filters
 router.get('/', adminAuth, checkPermission('applications', 'view'), async (req, res) => {
@@ -123,7 +61,7 @@ router.get('/', adminAuth, checkPermission('applications', 'view'), async (req, 
   }
 });
 
-// Get single message by ID
+// Get single message by ID (auto-mark as read)
 router.get('/:id', adminAuth, checkPermission('applications', 'view'), async (req, res) => {
   try {
     const { id } = req.params;
@@ -131,6 +69,12 @@ router.get('/:id', adminAuth, checkPermission('applications', 'view'), async (re
     const message = await Message.findById(id);
     if (!message) {
       return res.status(404).json({ message: 'Message not found' });
+    }
+
+    // Auto-change status from 'unread' to 'read' when viewing details
+    if (message.status === 'unread') {
+      message.status = 'read';
+      await message.save();
     }
 
     res.json(message);

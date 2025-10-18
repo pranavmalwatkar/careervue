@@ -34,17 +34,17 @@
     }
   },
   "isActive": true,
-  "loginAttempts": 0,
   "profilePicture": "",
   "department": "IT",
   "createdAt": {
     "$date": "2025-09-22T12:43:15.033Z"
   },
   "updatedAt": {
-    "$date": "2025-09-24T04:43:42.177Z"
+    "$date": "2025-10-18T09:04:27.354Z"
   },
   "__v": 0,
   "lastLogin": {
-    "$date": "2025-09-24T04:43:42.170Z"
-  }
+    "$date": "2025-10-18T09:04:27.347Z"
+  },
+  "loginAttempts": 0
 }]

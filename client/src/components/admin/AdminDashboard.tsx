@@ -17,6 +17,7 @@ import { UserManagement } from './UserManagement';
 import { JobManagement } from './JobManagement';
 import { MessageManagement } from './MessageManagement';
 import { ActivityManagement } from './ActivityManagement';
+import { MessageStatistics } from './MessageStatistics';
 import { fetchLatestJobUpdates, JobUpdate } from '../../services/jobUpdates';
 
 // Error Boundary Component
@@ -472,6 +473,7 @@ export const AdminDashboard: React.FC = () => {
         {activeTab === 'messages' && (
           <ErrorBoundary>
             <div className="space-y-6">
+              <MessageStatistics />
               <MessageManagement onMessageUpdate={fetchDashboardData} />
             </div>
           </ErrorBoundary>

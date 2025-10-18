@@ -6,7 +6,9 @@ import Job from '../models/Job.js';
 import GovernmentJob from '../models/GovernmentJob.js';
 import Company from '../models/Company.js';
 import Application from '../models/Application.js';
+import Message from '../models/Message.js';
 import { adminAuth, checkPermission, requireRole } from '../middleware/adminAuth.js';
+import { analyzeSentiment, getSentimentStats } from '../utils/sentimentAnalysis.js';
 import crypto from 'crypto';
 
 const router = express.Router();
@@ -1075,6 +1077,105 @@ router.delete('/companies/:id', adminAuth, checkPermission('jobs', 'delete'), as
     res.status(500).json({
       message: 'Failed to delete company',
       error: error.message
+    });
+  }
+});
+
+// Get message statistics for admin dashboard
+router.get('/messages/statistics', adminAuth, checkPermission('messages', 'view'), async (req, res) => {
+  try {
+    // Get total count of messages
+    const totalMessages = await Message.countDocuments();
+    
+    // Get messages count by status
+    const messagesByStatus = await Message.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          status: '$_id',
+          count: 1,
+          _id: 0
+        }
+      }
+    ]);
+
+    // Get messages count by day for the last 30 days with sentiment
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const recentMessages = await Message.find({
+      createdAt: { $gte: thirtyDaysAgo }
+    }).select('subject message createdAt');
+
+    // Analyze sentiment for each message and group by date
+    const dailyMessagesMap = {};
+    const dailySentimentMap = {};
+
+    recentMessages.forEach(msg => {
+      const dateStr = msg.createdAt.toISOString().split('T')[0];
+      const sentiment = analyzeSentiment(`${msg.subject} ${msg.message}`);
+      
+      if (!dailyMessagesMap[dateStr]) {
+        dailyMessagesMap[dateStr] = 0;
+        dailySentimentMap[dateStr] = { positive: 0, negative: 0, neutral: 0 };
+      }
+      
+      dailyMessagesMap[dateStr]++;
+      dailySentimentMap[dateStr][sentiment.sentiment]++;
+    });
+
+    const dailyMessages = Object.keys(dailyMessagesMap)
+      .sort()
+      .map(date => ({
+        date,
+        count: dailyMessagesMap[date],
+        positive: dailySentimentMap[date].positive,
+        negative: dailySentimentMap[date].negative,
+        neutral: dailySentimentMap[date].neutral
+      }));
+
+    // Get messages by priority
+    const messagesByPriority = await Message.aggregate([
+      {
+        $group: {
+          _id: '$priority',
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          priority: '$_id',
+          count: 1,
+          _id: 0
+        }
+      }
+    ]);
+
+    // Get all messages for sentiment analysis
+    const allMessages = await Message.find().select('subject message');
+    const sentimentStats = getSentimentStats(allMessages);
+
+    res.json({
+      success: true,
+      data: {
+        totalMessages,
+        messagesByStatus,
+        dailyMessages,
+        messagesByPriority,
+        sentimentStats
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching message statistics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching message statistics',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
