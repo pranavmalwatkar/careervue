@@ -7,7 +7,7 @@ This project uses environment variables for configuration in both the client and
 Location: `client/.env`
 
 ```
-VITE_APP_API_URL=http://localhost:5000/api
+VITE_APP_API_URL=https://careervue-server.vercel.app/
 VITE_APP_STRIPE_PUBLISHABLE_KEY=your-stripe-publishable-key
 ```
 

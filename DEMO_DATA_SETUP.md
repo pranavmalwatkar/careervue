@@ -8,7 +8,7 @@ This guide explains how to populate your CareerVue database with demo messages t
 ### Step 1: Ensure Server is Set Up
 Make sure your MongoDB connection is configured in `server/.env`:
 ```
-MONGODB_URI=mongodb://localhost:27017/careervue
+MONGODB_URI=mongodb+srv://pranavmalwatkar:Pranav@55@cluster0.lh0dbyk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 ```
 
 ### Step 2: Run the Message Seeder
