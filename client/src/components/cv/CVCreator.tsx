@@ -53,13 +53,13 @@ export interface CVData {
 
 const defaultCVData: CVData = {
   personalInfo: {
-    fullName: 'Pranav Malwatkar',
-    email: 'malwatkarpranav@gmail.com',
-    phone: '+91 9876543210',
-    location: 'Pune, Maharashtra, India',
-    linkedin: 'linkedin.com/in/pranav-malwatkar-9834b1239',
-    github: 'github.com/pranavmalwatkar',
-    website: 'pranavmalwatkar.dev'
+    fullName: 'Enter your Name',
+    email: 'Enter your Email',
+    phone: 'Enter your Phone Number',
+    location: 'Enter your Location',
+    linkedin: 'Enter your LinkedIn Profile',
+    github: 'Enter your GitHub Profile',
+    website: 'Enter your Website URL'
   },
   summary: 'Experienced Full-Stack Developer with 3+ years of expertise in React, Node.js, and cloud technologies. Proven track record of delivering scalable web applications and leading development teams. Passionate about creating user-centric solutions and driving digital transformation initiatives.',
   experience: [
